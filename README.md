@@ -1,4 +1,4 @@
-# samples-doc_telidtransponders_android / Amdrpod DPC sample code for TELID®200 sensor transponders
+# samples-doc_telidtransponders_android / Android DOC sample code for TELID®200 sensor transponders
 This sample code is for handling **TELID®200** sensor transponders on Android devices using a Micro-Sensys RFID reader
 
 [Test LINK: ](../doc/communication-modes/spc)
@@ -9,7 +9,7 @@ This sample code is for handling **TELID®200** sensor transponders on Android d
 * Android device to debug/deploy the sample code. You will need one of the following:
 	* Any Android device with Bluetooth, to use one of our Bluetooth RFID reader
 	* One of our supported industry Android devices, to use one of our RFID reader modules
-* Micro-Sensys RFID reader (either Bluetooth or module) with appropriate script running
+* Micro-Sensys RFID reader (either Bluetooth or module)
 * TELID®200 sensor transponders
 
 ## Implementation
