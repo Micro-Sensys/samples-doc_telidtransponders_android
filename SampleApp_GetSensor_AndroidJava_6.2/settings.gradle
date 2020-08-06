@@ -1,0 +1,3 @@
+include ':microsensysRFID_6.2'
+include ':app'
+rootProject.name = "SampleApp_GetSensor_AndroidJava_6.2"
