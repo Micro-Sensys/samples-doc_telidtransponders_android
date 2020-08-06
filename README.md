@@ -29,7 +29,7 @@ If you have a iID®PENsolid or iID®POCKETwork paired over Bluetooth to the devi
 
 ## Useful Links
 
- - [AAR Library und API documentation](https://www.microsensys.de/downloads/DevSamples/Libraries/Android/microsensysRFID%20-%20aar%20library/)
+ - [AAR Library and API documentation](https://www.microsensys.de/downloads/DevSamples/Libraries/Android/microsensysRFID%20-%20aar%20library/)
  - [Check what is possible using our iID®DEMOsoft (section SENSORdemo) for PC! Download it using this link](https://www.microsensys.de/downloads/CDContent/Install/iID%c2%ae%20DEMOsoft.zip)
 
 ## Contact
