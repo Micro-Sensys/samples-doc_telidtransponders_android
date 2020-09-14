@@ -1,8 +1,7 @@
 # samples-doc_telidtransponders_android / Android DOC sample code for TELID®200 sensor transponders
 This sample code is for handling **TELID®200** sensor transponders on Android devices using a Micro-Sensys RFID reader
 
-[Test LINK: ](../doc/communication-modes/spc)
-//TODO Add link See "..."
+> For details on DOC communication check [Useful Links](#Useful-Links) 
 
 ## Requirements
 * Android Studio
@@ -29,8 +28,10 @@ If you have a iID®PENsolid or iID®POCKETwork paired over Bluetooth to the devi
 
 ## Useful Links
 
- - [AAR Library and API documentation](https://www.microsensys.de/downloads/DevSamples/Libraries/Android/microsensysRFID%20-%20aar%20library/)
- - [Check what is possible using our iID®DEMOsoft (section SENSORdemo) for PC! Download it using this link](https://www.microsensys.de/downloads/CDContent/Install/iID%c2%ae%20DEMOsoft.zip)
+* [AAR Library and API documentation](https://www.microsensys.de/downloads/DevSamples/Libraries/Android/microsensysRFID%20-%20aar%20library/)
+* Check what is possible using our iID®DEMOsoft (section SENSORdemo) for PC! Download it using [this link](https://www.microsensys.de/downloads/CDContent/Install/iID%c2%ae%20DEMOsoft.zip)
+* GitHub *doc* repository: [Micro-Sensys/doc](https://github.com/Micro-Sensys/doc)
+	* [communication-modes/doc](https://github.com/Micro-Sensys/doc/tree/master/communication-modes/doc)
 
 ## Contact
 
