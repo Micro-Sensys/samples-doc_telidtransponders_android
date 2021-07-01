@@ -9,10 +9,8 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
@@ -25,7 +23,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-import de.microsensys.TELID.TELIDCalibration;
 import de.microsensys.TELID.TELIDSensorInfo;
 import de.microsensys.exceptions.MssException;
 import de.microsensys.functions.RFIDFunctions_3000;
@@ -63,55 +60,36 @@ public class MainActivity extends AppCompatActivity {
 
         sp_DeviceToConnect = findViewById(R.id.spinner_device);
         bt_Connect = findViewById(R.id.button_connect);
-        bt_Connect.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                connect();
-            }
-        });
+        bt_Connect.setOnClickListener(v -> connect());
         bt_Disconnect = findViewById(R.id.button_disconnect);
         bt_Disconnect.setEnabled(false);
-        bt_Disconnect.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                disconnect();
-            }
-        });
+        bt_Disconnect.setOnClickListener(v -> disconnect());
         rg_ScanType = findViewById(R.id.radiogroupScanType);
         cl_ManualSelect = findViewById(R.id.layoutManualSelect);
         rb_AutoScan = findViewById(R.id.radio_Auto);
-        rb_AutoScan.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+        rb_AutoScan.setOnCheckedChangeListener((buttonView, isChecked) -> {
 //                if (isChecked)
 //                    cl_ManualSelect.setVisibility(View.INVISIBLE);
 //                else
 //                    cl_ManualSelect.setVisibility(View.VISIBLE);
-                et_ManualPhSize.setEnabled(!isChecked);
-            }
+            et_ManualPhSize.setEnabled(!isChecked);
         });
         et_ManualPhSize = findViewById(R.id.et_PhSize);
         tv_LibInfo = findViewById(R.id.tv_LibInfo);
-        tv_LibInfo.setText("V 6.1");
+        tv_LibInfo.setText(String.format("V %s", de.microsensys.LibraryVersion.getVersionNumber()));
         tv_ReaderStatus = findViewById(R.id.tv_ReaderStatus);
         tv_ReaderInfo = findViewById(R.id.tv_ReaderInfo);
         bt_Start = findViewById(R.id.button_start);
-        bt_Start.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startScan();
-                bt_Start.setEnabled(false);
-                bt_Stop.setEnabled(true);
-            }
+        bt_Start.setOnClickListener(v -> {
+            startScan();
+            bt_Start.setEnabled(false);
+            bt_Stop.setEnabled(true);
         });
         bt_Stop = findViewById(R.id.button_stop);
-        bt_Stop.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                stopScan();
-                bt_Start.setEnabled(true);
-                bt_Stop.setEnabled(false);
-            }
+        bt_Stop.setOnClickListener(v -> {
+            stopScan();
+            bt_Start.setEnabled(true);
+            bt_Stop.setEnabled(false);
         });
         tv_LastResult = findViewById(R.id.tv_LastResult);
         tv_LastSerNo = findViewById(R.id.tv_SerNo);
@@ -146,14 +124,11 @@ public class MainActivity extends AppCompatActivity {
         appendResultText(_toAppend, true);
     }
     private void appendResultText(final String _toAppend, final boolean _autoAppendNewLine){
-        new Handler(Looper.getMainLooper()).post(new Runnable() {
-            @Override
-            public void run() {
-                if (_autoAppendNewLine)
-                    et_Logging.append(_toAppend + "\n");
-                else
-                    et_Logging.append(_toAppend);
-            }
+        new Handler(Looper.getMainLooper()).post(() -> {
+            if (_autoAppendNewLine)
+                et_Logging.append(_toAppend + "\n");
+            else
+                et_Logging.append(_toAppend);
         });
     }
 
@@ -195,47 +170,38 @@ public class MainActivity extends AppCompatActivity {
         //Open process finished
         if (_connected) {
             // Communication port is open
-            new Handler(Looper.getMainLooper()).post(new Runnable() {
-                @Override
-                public void run() {
-                    et_Logging.append("\nCONNECTED\n");
-                    if (_readerID > 0) {
-                        tv_ReaderInfo.setText("ReaderID: " + _readerID);
-                        tv_ReaderStatus.setBackgroundColor(Color.GREEN);
-                    }
-                    else
-                        tv_ReaderStatus.setBackgroundColor(Color.YELLOW);
-                    setUiConnected(true);
+            new Handler(Looper.getMainLooper()).post(() -> {
+                et_Logging.append("\nCONNECTED\n");
+                if (_readerID > 0) {
+                    tv_ReaderInfo.setText(String.format(Locale.getDefault(), "ReaderID: %d", _readerID));
+                    tv_ReaderStatus.setBackgroundColor(Color.GREEN);
                 }
+                else
+                    tv_ReaderStatus.setBackgroundColor(Color.YELLOW);
+                setUiConnected(true);
             });
         } else {
             // Communication port is open
-            new Handler(Looper.getMainLooper()).post(new Runnable() {
-                @Override
-                public void run() {
-                    et_Logging.append("\n Reader NOT connected \n");
-                    setUiConnected(false);
-                }
+            new Handler(Looper.getMainLooper()).post(() -> {
+                et_Logging.append("\n Reader NOT connected \n");
+                setUiConnected(false);
             });
         }
     }
     private void sensorFound(final TELIDSensorInfo _sensorInfo) {
-        new Handler(Looper.getMainLooper()).post(new Runnable() {
-            @Override
-            public void run() {
-                if (_sensorInfo != null) {
-                    tv_LastResult.setBackgroundColor(Color.GREEN);
-                    tv_LastSerNo.setText(_sensorInfo.getSerialNumber());
-                    tv_LastType.setText(_sensorInfo.getTELIDDescription());
-                    tv_LastTimestamp.setText(new SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(new Date()));
-                    et_Logging.setText("");
-                    for(String sensorValue : _sensorInfo.getSensorValueStrings()){
-                        et_Logging.append(sensorValue + "\n");
-                    }
+        new Handler(Looper.getMainLooper()).post(() -> {
+            if (_sensorInfo != null) {
+                tv_LastResult.setBackgroundColor(Color.GREEN);
+                tv_LastSerNo.setText(_sensorInfo.getSerialNumber());
+                tv_LastType.setText(_sensorInfo.getTELIDDescription());
+                tv_LastTimestamp.setText(new SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(new Date()));
+                et_Logging.setText("");
+                for(String sensorValue : _sensorInfo.getSensorValueStrings()){
+                    et_Logging.append(sensorValue + "\n");
                 }
-                else{
-                    tv_LastResult.setBackgroundColor(Color.RED);
-                }
+            }
+            else{
+                tv_LastResult.setBackgroundColor(Color.RED);
             }
         });
     }
@@ -289,7 +255,7 @@ public class MainActivity extends AppCompatActivity {
         if (rb_AutoScan.isChecked())
             mScanThread = new ScanThread();
         else
-            mScanThread = new ScanThread(Byte.valueOf(et_ManualPhSize.getText().toString()));
+            mScanThread = new ScanThread(Byte.parseByte(et_ManualPhSize.getText().toString()));
         mScanThread.start();
     }
     private void stopScan() {
