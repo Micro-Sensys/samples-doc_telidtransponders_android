@@ -67,13 +67,7 @@ public class MainActivity extends AppCompatActivity {
         rg_ScanType = findViewById(R.id.radiogroupScanType);
         cl_ManualSelect = findViewById(R.id.layoutManualSelect);
         rb_AutoScan = findViewById(R.id.radio_Auto);
-        rb_AutoScan.setOnCheckedChangeListener((buttonView, isChecked) -> {
-//                if (isChecked)
-//                    cl_ManualSelect.setVisibility(View.INVISIBLE);
-//                else
-//                    cl_ManualSelect.setVisibility(View.VISIBLE);
-            et_ManualPhSize.setEnabled(!isChecked);
-        });
+        rb_AutoScan.setOnCheckedChangeListener((buttonView, isChecked) -> et_ManualPhSize.setEnabled(!isChecked));
         et_ManualPhSize = findViewById(R.id.et_PhSize);
         tv_LibInfo = findViewById(R.id.tv_LibInfo);
         tv_LibInfo.setText(String.format("V %s", de.microsensys.LibraryVersion.getVersionNumber()));
