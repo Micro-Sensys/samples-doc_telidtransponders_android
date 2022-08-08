@@ -1,2 +1,2 @@
 include ':app'
-rootProject.name = "SampleApp_GetSensor_AndroidJava_6.6"
+rootProject.name = "SampleApp_GetSensor_AndroidJava_6.9"

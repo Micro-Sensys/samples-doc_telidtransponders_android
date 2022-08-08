@@ -27,6 +27,8 @@ import de.microsensys.TELID.TELIDSensorInfo;
 import de.microsensys.exceptions.MssException;
 import de.microsensys.functions.RFIDFunctions_3000;
 import de.microsensys.utils.BluetoothDeviceScan;
+import de.microsensys.utils.PermissionFunctions;
+import de.microsensys.utils.PortTypeEnum;
 import de.microsensys.utils.ReaderIDInfo;
 
 public class MainActivity extends AppCompatActivity {
@@ -91,6 +93,23 @@ public class MainActivity extends AppCompatActivity {
         tv_LastTimestamp = findViewById(R.id.tv_LastTimestamp);
         et_Logging = findViewById(R.id.edit_logging);
 
+        rb_AutoScan.setChecked(true);
+        setUiConnected(false);
+    }
+
+    @Override
+    protected void onPostResume() {
+        super.onPostResume();
+
+        //Check if there are permissions that need to be requested (USB permission is requested first when "initialize" is called)
+        String[] neededPermissions = PermissionFunctions.getNeededPermissions(getApplicationContext(), PortTypeEnum.Bluetooth);
+        if (neededPermissions.length > 0){
+            et_Logging.append("Allow permissions and try again.\n");
+            requestPermissions(neededPermissions, 0);
+            return;
+        }
+
+        et_Logging.append("Permissions granted.\n");
         //Fill spinner with list of paired POCKETwork devices
         List<String> deviceNames = new ArrayList<>();
         BluetoothAdapter mAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -110,8 +129,6 @@ public class MainActivity extends AppCompatActivity {
         );
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         sp_DeviceToConnect.setAdapter(adapter);
-        rb_AutoScan.setChecked(true);
-        setUiConnected(false);
     }
 
     private void appendResultText(String _toAppend){
@@ -135,14 +152,23 @@ public class MainActivity extends AppCompatActivity {
             //TODO notify user to select a device to connect to!
             return;
         }
+
+        //Check if there are permissions that need to be requested (USB permission is requested first when "initialize" is called)
+        String[] neededPermissions = PermissionFunctions.getNeededPermissions(getApplicationContext(), PortTypeEnum.Bluetooth);
+        if (neededPermissions.length > 0){
+            et_Logging.append("Allow permissions and try again.");
+            requestPermissions(neededPermissions, 0);
+            return;
+        }
+
         sp_DeviceToConnect.setEnabled(false);
 
         //Initialize SpcInterfaceControl instance.
-        //  PortType = 2 --> Bluteooth
+        //  PortType = PortTypeEnum.Bluetooth --> Bluteooth
         //  PortName = selected device in Spinner --> Device name as shown in Settings
         mRFIDFunctions = new RFIDFunctions_3000(
                 getApplicationContext(),    //Context
-                2);
+                PortTypeEnum.Bluetooth);
         mRFIDFunctions.setPortName(sp_DeviceToConnect.getSelectedItem().toString());
 
         //Try to open communication port. This call does not block!!
@@ -274,6 +300,7 @@ public class MainActivity extends AppCompatActivity {
                 if (mRFIDFunctions.isConnecting()){
                     //Still trying to connect -> Wait and continue
                     try {
+                        //noinspection BusyWait
                         Thread.sleep(200);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
@@ -342,6 +369,7 @@ public class MainActivity extends AppCompatActivity {
                     sensorFound(sensorInfo);
                 }
                 try {
+                    //noinspection BusyWait
                     Thread.sleep(1000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
