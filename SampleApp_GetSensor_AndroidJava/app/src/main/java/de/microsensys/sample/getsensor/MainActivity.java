@@ -1,14 +1,15 @@
-package de.microsensys.sampleapp_androidjava.getsensor;
+package de.microsensys.sample.getsensor;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.app.ActivityCompat;
 
+import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -103,7 +104,7 @@ public class MainActivity extends AppCompatActivity {
 
         //Check if there are permissions that need to be requested (USB permission is requested first when "initialize" is called)
         String[] neededPermissions = PermissionFunctions.getNeededPermissions(getApplicationContext(), PortTypeEnum.Bluetooth);
-        if (neededPermissions.length > 0){
+        if (neededPermissions.length > 0) {
             et_Logging.append("Allow permissions and try again.\n");
             requestPermissions(neededPermissions, 0);
             return;
@@ -113,10 +114,14 @@ public class MainActivity extends AppCompatActivity {
         //Fill spinner with list of paired POCKETwork devices
         List<String> deviceNames = new ArrayList<>();
         BluetoothAdapter mAdapter = BluetoothAdapter.getDefaultAdapter();
-        if (mAdapter!=null){
+        if (mAdapter != null) {
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+                // TODO: Already requested in snippet above, but Android Studio throws an error because not explicitly checked for the exception in code
+                return;
+            }
             //List of connected devices
             List<BluetoothDevice> pairedDevices = BluetoothDeviceScan.getPairedDevices(mAdapter);
-            if (pairedDevices.size()>0){
+            if (pairedDevices.size() > 0) {
                 for (BluetoothDevice device : pairedDevices) {
                     if (device.getName().startsWith("iID "))
                         deviceNames.add(device.getName());
@@ -129,18 +134,6 @@ public class MainActivity extends AppCompatActivity {
         );
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         sp_DeviceToConnect.setAdapter(adapter);
-    }
-
-    private void appendResultText(String _toAppend){
-        appendResultText(_toAppend, true);
-    }
-    private void appendResultText(final String _toAppend, final boolean _autoAppendNewLine){
-        new Handler(Looper.getMainLooper()).post(() -> {
-            if (_autoAppendNewLine)
-                et_Logging.append(_toAppend + "\n");
-            else
-                et_Logging.append(_toAppend);
-        });
     }
 
     private void connect() {
@@ -190,7 +183,7 @@ public class MainActivity extends AppCompatActivity {
         //Open process finished
         if (_connected) {
             // Communication port is open
-            new Handler(Looper.getMainLooper()).post(() -> {
+            runOnUiThread(() -> {
                 et_Logging.append("\nCONNECTED\n");
                 if (_readerID > 0) {
                     tv_ReaderInfo.setText(String.format(Locale.getDefault(), "ReaderID: %d", _readerID));
@@ -202,14 +195,14 @@ public class MainActivity extends AppCompatActivity {
             });
         } else {
             // Communication port is open
-            new Handler(Looper.getMainLooper()).post(() -> {
+            runOnUiThread(() -> {
                 et_Logging.append("\n Reader NOT connected \n");
                 setUiConnected(false);
             });
         }
     }
     private void sensorFound(final TELIDSensorInfo _sensorInfo) {
-        new Handler(Looper.getMainLooper()).post(() -> {
+        runOnUiThread(() -> {
             if (_sensorInfo != null) {
                 tv_LastResult.setBackgroundColor(Color.GREEN);
                 tv_LastSerNo.setText(_sensorInfo.getSerialNumber());
@@ -305,7 +298,7 @@ public class MainActivity extends AppCompatActivity {
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-                    appendResultText(".", false);
+                    runOnUiThread(() -> et_Logging.append("."));
                     continue;
                 }
                 //Connecting finished! Check if connected or not connected

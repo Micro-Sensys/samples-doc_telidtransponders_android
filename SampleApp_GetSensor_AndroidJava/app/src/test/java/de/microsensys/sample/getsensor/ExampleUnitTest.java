@@ -1,4 +1,4 @@
-package de.microsensys.sampleapp_androidjava.getsensor;
+package de.microsensys.sample.getsensor;
 
 import org.junit.Test;
 
