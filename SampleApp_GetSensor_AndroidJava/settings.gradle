@@ -1,2 +1,0 @@
-include ':app'
-rootProject.name = "SampleApp_GetSensor_AndroidJava_6.9"
