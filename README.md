@@ -41,4 +41,4 @@ If you have a iID®PENsolid or iID®POCKETwork paired over Bluetooth to the devi
 
 ## Authors
 
-* **Victor Garcia** - *Initial work* - [MICS-VGarcia](https://github.com/MICS-VGarcia/)
+* **Victor Garcia** - *Creator* - [MICS-VGarcia](https://github.com/MICS-VGarcia/)
