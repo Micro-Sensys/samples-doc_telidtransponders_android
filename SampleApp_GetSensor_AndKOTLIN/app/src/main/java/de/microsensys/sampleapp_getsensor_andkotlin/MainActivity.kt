@@ -1,13 +1,11 @@
 package de.microsensys.sampleapp_getsensor_andkotlin
 
 import android.Manifest
-import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothManager
+import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.Color
-import android.os.Build
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.CompoundButton
@@ -16,8 +14,12 @@ import android.widget.RadioButton
 import android.widget.RadioGroup
 import android.widget.Spinner
 import android.widget.TextView
+import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.ActivityCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import de.microsensys.LibraryVersion
 import de.microsensys.TELID.TELIDSensorInfo
 import de.microsensys.exceptions.MssException
@@ -32,23 +34,23 @@ import java.util.Locale
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var sp_DeviceToConnect: Spinner
-    private lateinit var bt_Connect: Button
-    private lateinit var bt_Disconnect: Button
-    private lateinit var rg_ScanType: RadioGroup
-    private lateinit var rb_AutoScan: RadioButton
-    private lateinit var cl_ManualSelect: ConstraintLayout
-    private lateinit var et_ManualPhSize: EditText
-    private lateinit var tv_LibInfo: TextView
-    private lateinit var tv_ReaderStatus: TextView
-    private lateinit var tv_ReaderInfo: TextView
-    private lateinit var bt_Start: Button
-    private lateinit var bt_Stop: Button
-    private lateinit var tv_LastResult: TextView
-    private lateinit var tv_LastSerNo: TextView
-    private lateinit var tv_LastType: TextView
-    private lateinit var tv_LastTimestamp: TextView
-    private lateinit var et_Logging: EditText
+    private lateinit var spDeviceToConnect: Spinner
+    private lateinit var btConnect: Button
+    private lateinit var btDisconnect: Button
+    private lateinit var rgScanType: RadioGroup
+    private lateinit var rbAutoScan: RadioButton
+    private lateinit var clManualSelect: ConstraintLayout
+    private lateinit var etManualPhSize: EditText
+    private lateinit var tvLibInfo: TextView
+    private lateinit var tvReaderStatus: TextView
+    private lateinit var tvReaderInfo: TextView
+    private lateinit var btStart: Button
+    private lateinit var btStop: Button
+    private lateinit var tvLastResult: TextView
+    private lateinit var tvLastSerNo: TextView
+    private lateinit var tvLastType: TextView
+    private lateinit var tvLastTimestamp: TextView
+    private lateinit var etLogging: EditText
 
     private var mRFIDFunctions: RFIDFunctions_3000? = null
     private var mCheckThread: CheckConnectingReaderThread? = null
@@ -56,47 +58,53 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
         setContentView(R.layout.activity_main)
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+            insets
+        }
 
-        sp_DeviceToConnect = findViewById(R.id.spinner_device)
-        bt_Connect = findViewById(R.id.button_connect)
-        bt_Connect.setOnClickListener {
+        spDeviceToConnect = findViewById(R.id.spinner_device)
+        btConnect = findViewById(R.id.button_connect)
+        btConnect.setOnClickListener {
             connect()
         }
-        bt_Disconnect = findViewById(R.id.button_disconnect)
-        bt_Disconnect.isEnabled = false
-        bt_Disconnect.setOnClickListener {
-                disconnect()
+        btDisconnect = findViewById(R.id.button_disconnect)
+        btDisconnect.isEnabled = false
+        btDisconnect.setOnClickListener {
+            disconnect()
         }
-        rg_ScanType = findViewById(R.id.radiogroupScanType)
-        cl_ManualSelect = findViewById(R.id.layoutManualSelect)
-        rb_AutoScan = findViewById(R.id.radio_Auto)
-        rb_AutoScan.setOnCheckedChangeListener { _: CompoundButton?, isChecked: Boolean ->
-            et_ManualPhSize.isEnabled = !isChecked
+        rgScanType = findViewById(R.id.radiogroupScanType)
+        clManualSelect = findViewById(R.id.layoutManualSelect)
+        rbAutoScan = findViewById(R.id.radio_Auto)
+        rbAutoScan.setOnCheckedChangeListener { _: CompoundButton?, isChecked: Boolean ->
+            etManualPhSize.isEnabled = !isChecked
         }
-        et_ManualPhSize = findViewById(R.id.et_PhSize)
-        tv_LibInfo = findViewById(R.id.tv_LibInfo)
-        tv_LibInfo.text = String.format("V %s", LibraryVersion.getVersionNumber())
-        tv_ReaderStatus = findViewById(R.id.tv_ReaderStatus)
-        tv_ReaderInfo = findViewById(R.id.tv_ReaderInfo)
-        bt_Start = findViewById(R.id.button_start)
-        bt_Start.setOnClickListener {
+        etManualPhSize = findViewById(R.id.et_PhSize)
+        tvLibInfo = findViewById(R.id.tv_LibInfo)
+        tvLibInfo.text = String.format("V %s", LibraryVersion.getVersionNumber())
+        tvReaderStatus = findViewById(R.id.tv_ReaderStatus)
+        tvReaderInfo = findViewById(R.id.tv_ReaderInfo)
+        btStart = findViewById(R.id.button_start)
+        btStart.setOnClickListener {
             startScan()
-            bt_Start.isEnabled = false
-            bt_Stop.isEnabled = true
+            btStart.isEnabled = false
+            btStop.isEnabled = true
         }
-        bt_Stop = findViewById(R.id.button_stop)
-        bt_Stop.setOnClickListener {
+        btStop = findViewById(R.id.button_stop)
+        btStop.setOnClickListener {
             stopScan()
-            bt_Start.isEnabled = true
-            bt_Stop.isEnabled = false
+            btStart.isEnabled = true
+            btStop.isEnabled = false
         }
-        tv_LastResult = findViewById(R.id.tv_LastResult)
-        tv_LastSerNo = findViewById(R.id.tv_SerNo)
-        tv_LastType = findViewById(R.id.tv_TelidType)
-        tv_LastTimestamp = findViewById(R.id.tv_LastTimestamp)
-        et_Logging = findViewById(R.id.edit_logging)
-        rb_AutoScan.isChecked = true
+        tvLastResult = findViewById(R.id.tv_LastResult)
+        tvLastSerNo = findViewById(R.id.tv_SerNo)
+        tvLastType = findViewById(R.id.tv_TelidType)
+        tvLastTimestamp = findViewById(R.id.tv_LastTimestamp)
+        etLogging = findViewById(R.id.edit_logging)
+        rbAutoScan.isChecked = true
         setUiConnected(false)
     }
 
@@ -106,20 +114,19 @@ class MainActivity : AppCompatActivity() {
         //Check if there are permissions that need to be requested (USB permission is requested first when "initialize" is called)
         val neededPermissions = PermissionFunctions.getNeededPermissions(applicationContext, PortTypeEnum.Bluetooth)
         if (neededPermissions.isNotEmpty()) {
-            et_Logging.append("Allow permissions and try again.\n")
+            etLogging.append("Allow permissions and try again.\n")
             requestPermissions(neededPermissions, 0)
             return
         }
-        et_Logging.append("Permissions granted.\n")
+        etLogging.append("Permissions granted.\n")
         //Fill spinner with list of paired POCKETwork devices
         val deviceNames: MutableList<String> = ArrayList()
-        val mAdapter = BluetoothAdapter.getDefaultAdapter()
+        val bluetoothManager = applicationContext.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+        val mAdapter = bluetoothManager.adapter
         if (mAdapter != null) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
-                    // TODO: Already requested in snippet above, but Android Studio throws an error because not explicitly checked for the exception in code
-                    return
-                }
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+                // TODO: Already requested in snippet above, but Android Studio throws an error because not explicitly checked for the exception in code
+                return
             }
             //List of connected devices
             val pairedDevices = BluetoothDeviceScan.getPairedDevices(mAdapter)
@@ -134,15 +141,15 @@ class MainActivity : AppCompatActivity() {
             android.R.layout.simple_spinner_item, deviceNames
         )
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        sp_DeviceToConnect.adapter = adapter
+        spDeviceToConnect.adapter = adapter
     }
 
     private fun connect() {
-        et_Logging.setText("")
+        etLogging.setText("")
 
         //Before opening a new communication port, make sure that previous instance is disposed
         disposeRfidFunctions()
-        if (sp_DeviceToConnect.selectedItemPosition == -1) {
+        if (spDeviceToConnect.selectedItemPosition == -1) {
             //TODO notify user to select a device to connect to!
             return
         }
@@ -151,11 +158,11 @@ class MainActivity : AppCompatActivity() {
         val neededPermissions =
             PermissionFunctions.getNeededPermissions(applicationContext, PortTypeEnum.Bluetooth)
         if (neededPermissions.isNotEmpty()) {
-            et_Logging.append("Allow permissions and try again.")
+            etLogging.append("Allow permissions and try again.")
             requestPermissions(neededPermissions, 0)
             return
         }
-        sp_DeviceToConnect.isEnabled = false
+        spDeviceToConnect.isEnabled = false
 
         //Initialize SpcInterfaceControl instance.
         //  PortType = PortTypeEnum.Bluetooth --> Bluteooth
@@ -164,20 +171,20 @@ class MainActivity : AppCompatActivity() {
             applicationContext,  //Context
             PortTypeEnum.Bluetooth
         )
-        mRFIDFunctions!!.portName = sp_DeviceToConnect.selectedItem.toString()
+        mRFIDFunctions!!.portName = spDeviceToConnect.selectedItem.toString()
 
         //Try to open communication port. This call does not block!!
         try {
             mRFIDFunctions!!.initialize()
             //No exception --> Check for process in a separate thread
-            et_Logging.append("Connecting...")
+            etLogging.append("Connecting...")
             startCheckConnectingThread()
-            bt_Connect.isEnabled = false
-            bt_Disconnect.isEnabled = true
+            btConnect.isEnabled = false
+            btDisconnect.isEnabled = true
         } catch (e: MssException) {
             e.printStackTrace()
-            et_Logging.append("Error opening port.")
-            sp_DeviceToConnect.isEnabled = true
+            etLogging.append("Error opening port.")
+            spDeviceToConnect.isEnabled = true
         }
     }
 
@@ -186,55 +193,55 @@ class MainActivity : AppCompatActivity() {
         if (_connected) {
             // Communication port is open
             runOnUiThread {
-                et_Logging.append("\nCONNECTED\n")
+                etLogging.append("\nCONNECTED\n")
                 if (_readerID > 0) {
-                    tv_ReaderInfo.text =
+                    tvReaderInfo.text =
                         String.format(Locale.getDefault(), "ReaderID: %d", _readerID)
-                    tv_ReaderStatus.setBackgroundColor(Color.GREEN)
-                } else tv_ReaderStatus.setBackgroundColor(Color.YELLOW)
+                    tvReaderStatus.setBackgroundColor(Color.GREEN)
+                } else tvReaderStatus.setBackgroundColor(Color.YELLOW)
                 setUiConnected(true)
             }
         } else {
             // Communication port is open
             runOnUiThread {
-                et_Logging.append("\n Reader NOT connected \n")
+                etLogging.append("\n Reader NOT connected \n")
                 setUiConnected(false)
             }
         }
     }
 
-    private fun sensorFound(_sensorInfo: TELIDSensorInfo?) {
+    private fun sensorFound(sensorInfo: TELIDSensorInfo?) {
         runOnUiThread {
-            if (_sensorInfo != null) {
-                tv_LastResult.setBackgroundColor(Color.GREEN)
-                tv_LastSerNo.text = _sensorInfo.serialNumber
-                tv_LastType.text = _sensorInfo.telidDescription
-                tv_LastTimestamp.text =
+            if (sensorInfo != null) {
+                tvLastResult.setBackgroundColor(Color.GREEN)
+                tvLastSerNo.text = sensorInfo.serialNumber
+                tvLastType.text = sensorInfo.telidDescription
+                tvLastTimestamp.text =
                     SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(Date())
-                et_Logging.setText("")
-                for (sensorValue in _sensorInfo.sensorValueStrings) {
-                    et_Logging.append(sensorValue.toString())
+                etLogging.setText("")
+                for (sensorValue in sensorInfo.sensorValueStrings) {
+                    etLogging.append(sensorValue.toString())
                 }
             } else {
-                tv_LastResult.setBackgroundColor(Color.RED)
+                tvLastResult.setBackgroundColor(Color.RED)
             }
         }
     }
 
-    private fun setUiConnected(_isConnected: Boolean) {
-        if (_isConnected) {
-            bt_Start.isEnabled = true
-            rg_ScanType.isEnabled = true
-            cl_ManualSelect.isEnabled = true
+    private fun setUiConnected(isConnected: Boolean) {
+        if (isConnected) {
+            btStart.isEnabled = true
+            rgScanType.isEnabled = true
+            clManualSelect.isEnabled = true
         } else {
-            sp_DeviceToConnect.isEnabled = true
-            bt_Connect.isEnabled = true
-            bt_Disconnect.isEnabled = false
-            bt_Start.isEnabled = false
-            tv_ReaderInfo.text = ""
-            tv_ReaderStatus.setBackgroundColor(Color.TRANSPARENT)
-            rg_ScanType.isEnabled = false
-            cl_ManualSelect.isEnabled = false
+            spDeviceToConnect.isEnabled = true
+            btConnect.isEnabled = true
+            btDisconnect.isEnabled = false
+            btStart.isEnabled = false
+            tvReaderInfo.text = ""
+            tvReaderStatus.setBackgroundColor(Color.TRANSPARENT)
+            rgScanType.isEnabled = false
+            clManualSelect.isEnabled = false
         }
     }
 
@@ -243,7 +250,7 @@ class MainActivity : AppCompatActivity() {
         disposeScanThread()
         disposeRfidFunctions()
         setUiConnected(false)
-        et_Logging.append("\n DISCONNECTED")
+        etLogging.append("\n DISCONNECTED")
     }
 
     private fun disposeRfidFunctions() {
@@ -267,8 +274,8 @@ class MainActivity : AppCompatActivity() {
 
     private fun startScan() {
         disposeScanThread()
-        mScanThread = if (rb_AutoScan.isChecked) ScanThread() else ScanThread(
-            et_ManualPhSize.text.toString().toByte()
+        mScanThread = if (rbAutoScan.isChecked) ScanThread() else ScanThread(
+            etManualPhSize.text.toString().toByte()
         )
         mScanThread!!.start()
     }
@@ -282,11 +289,10 @@ class MainActivity : AppCompatActivity() {
         mCheckThread = CheckConnectingReaderThread()
         mCheckThread!!.start()
     }
-
-    private inner class CheckConnectingReaderThread() : Thread() {
-        private var crt_loop = true
+    private inner class CheckConnectingReaderThread : Thread() {
+        private var crtLoop = true
         override fun run() {
-            while (crt_loop) {
+            while (crtLoop) {
                 if (mRFIDFunctions!!.isConnecting) {
                     //Still trying to connect -> Wait and continue
                     try {
@@ -294,7 +300,7 @@ class MainActivity : AppCompatActivity() {
                     } catch (e: InterruptedException) {
                         e.printStackTrace()
                     }
-                    runOnUiThread { et_Logging.append(".") }
+                    runOnUiThread { etLogging.append(".") }
                     continue
                 }
                 //Connecting finished! Check if connected or not connected
@@ -316,7 +322,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         fun cancel() {
-            crt_loop = false
+            crtLoop = false
         }
     }
 
