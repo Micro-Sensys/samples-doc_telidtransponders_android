@@ -130,7 +130,7 @@ class MainActivity : AppCompatActivity() {
             }
             //List of connected devices
             val pairedDevices = BluetoothDeviceScan.getPairedDevices(mAdapter)
-            if (pairedDevices.size > 0) {
+            if (pairedDevices.isNotEmpty()) {
                 for (device in pairedDevices) {
                     if (device.name.startsWith("iID ")) deviceNames.add(device.name)
                 }
@@ -311,8 +311,7 @@ class MainActivity : AppCompatActivity() {
                         if (readerId != null) {
                             connectProcedureFinished(true, readerId.readerID)
                         }
-                    } catch (ignore: Exception) {
-                    }
+                    } catch (_: Exception) { }
                 }
                 if (readerId == null) connectProcedureFinished(false, 0)
 
