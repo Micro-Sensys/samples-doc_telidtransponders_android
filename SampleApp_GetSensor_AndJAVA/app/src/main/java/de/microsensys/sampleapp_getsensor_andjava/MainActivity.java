@@ -38,6 +38,7 @@ import de.microsensys.utils.PermissionFunctions;
 import de.microsensys.utils.PortTypeEnum;
 import de.microsensys.utils.ReaderIDInfo;
 
+@SuppressWarnings("ALL")
 public class MainActivity extends AppCompatActivity {
 
     Spinner sp_DeviceToConnect;
@@ -135,7 +136,7 @@ public class MainActivity extends AppCompatActivity {
             }
             //List of connected devices
             List<BluetoothDevice> pairedDevices = BluetoothDeviceScan.getPairedDevices(mAdapter);
-            if (pairedDevices.size() > 0) {
+            if (!pairedDevices.isEmpty()) {
                 for (BluetoothDevice device : pairedDevices) {
                     if (device.getName().startsWith("iID "))
                         deviceNames.add(device.getName());

@@ -38,7 +38,7 @@ android {
 }
 
 dependencies {
-    implementation(files("libs/microsensysRFID_6.15.aar"))
+    implementation(libs.microsensysrfid)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
